@@ -56,18 +56,19 @@ app.post('/posts', async (req, res) => {
     // Kita bisa melakukan ini karena middleware express.json()
     const { title, body, author } = req.body;
 
-    if (title, body, author){
-      res.status(400).send("Title, body, dan author wajib diisi")      
-    } else {
-      // Buat postingan baru menggunakan model Post
-      const newPost = await Post.create({
-        title: title,
-        body: body,
-        author: author
-      });
-      // Kirim kembali response sukses (201 Created) bersama data yang baru dibuat
-      res.status(201).json(newPost);
+    // Validasi input: Cek jika salah satu field kosong
+    if (!title || !body || !author) {
+      return res.status(400).json({ message: "Title, body, dan author wajib diisi" });
     }
+    
+    const newPost = await Post.create({
+      title: title,
+      body: body,
+      author: author
+    });
+    // Kirim kembali response sukses (201 Created) bersama data yang baru dibuat
+    res.status(201).json(newPost);
+  
   } catch (error) {
     // Jika terjadi error (misalnya validasi gagal), kirim response error
     res.status(400).json({ message: 'Gagal membuat post', error: error.message });
