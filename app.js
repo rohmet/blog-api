@@ -50,6 +50,7 @@ app.get('/', (req, res) => {
   res.send('Selamat datang di Blog API!');
 });
 
+// === ROUTES UNTUK POSTS ===.
 app.post('/posts', async (req, res) => {
   try {
     // Ambil data (title, body, author) dari request body
@@ -60,7 +61,7 @@ app.post('/posts', async (req, res) => {
     if (!title || !body || !author) {
       return res.status(400).json({ message: "Title, body, dan author wajib diisi" });
     }
-    
+
     const newPost = await Post.create({
       title: title,
       body: body,
@@ -72,5 +73,34 @@ app.post('/posts', async (req, res) => {
   } catch (error) {
     // Jika terjadi error (misalnya validasi gagal), kirim response error
     res.status(400).json({ message: 'Gagal membuat post', error: error.message });
+  }
+});
+
+// READ - Mengambil semua postingan
+app.get('/posts', async (req, res) => {
+  try {
+    const posts = await Post.find({}).sort({ createdAt: -1 });
+    res.status(200).json(posts);
+  } catch (error) {
+    res.status(500).json({ message: 'Gagal mengambil data posts', error: error.message });
+  }
+});
+
+// READ - Mengambil satu postingan berdasarkan ID
+app.get('/posts/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const post = await Post.findById(id);
+
+    // Jika post dengan ID tersebut tidak ditemukan
+    if (!post) {
+      return res.status(404).json({ message: "Post tidak ditemukan" });
+    }
+
+    // Jika post ditemukan
+    res.status(200).json(post);
+  } catch (error) {
+    // Error bisa terjadi jika format ID tidak valid
+    res.status(500).json({ message: 'Gagal mengambil data post', error: error.message });
   }
 });
