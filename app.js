@@ -104,3 +104,31 @@ app.get('/posts/:id', async (req, res) => {
     res.status(500).json({ message: 'Gagal mengambil data post', error: error.message });
   }
 });
+
+// UPDATE - Memperbarui postingan berdasarkan ID
+app.put('/posts/:id', async (req, res) => {
+  try {
+    const { id } = req.params; // Dapatkan ID dari URL
+    const updateData = req.body; // Dapatkan data baru dari body request
+
+    if (Object.keys(updateData).length === 0){
+      res.status(400).send("Tidak ada data yang dikirim untuk diperbarui.")
+    }
+
+    const updatedPost = await Post.findByIdAndUpdate(id, updateData, {
+      new: true, // Mengembalikan dokumen yang SUDAH diperbarui
+      runValidators: true // Menjalankan validasi schema (misal: 'required') pada update
+    });
+
+    // Jika post dengan ID tersebut tidak ditemukan
+    if (!updatedPost) {
+      return res.status(404).json({ message: "Post tidak ditemukan" });
+    }
+
+    // Jika berhasil, kirim kembali post yang sudah diupdate
+    res.status(200).json(updatedPost);
+
+  } catch (error) {
+    res.status(500).json({ message: 'Gagal memperbarui post', error: error.message });
+  }
+});
