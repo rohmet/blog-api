@@ -2,6 +2,7 @@
 require('dotenv').config(); // Panggil ini di baris paling atas!
 const express = require('express');
 const mongoose = require('mongoose');
+const Post = require('./models/post.model.js');
 
 // 2. Inisialisasi aplikasi Express
 const app = express();
@@ -47,4 +48,28 @@ mongoose.connect(process.env.MONGODB_URL)
 // Rute sederhana untuk pengujian
 app.get('/', (req, res) => {
   res.send('Selamat datang di Blog API!');
+});
+
+app.post('/posts', async (req, res) => {
+  try {
+    // Ambil data (title, body, author) dari request body
+    // Kita bisa melakukan ini karena middleware express.json()
+    const { title, body, author } = req.body;
+
+    if (title, body, author){
+      res.status(400).send("Title, body, dan author wajib diisi")      
+    } else {
+      // Buat postingan baru menggunakan model Post
+      const newPost = await Post.create({
+        title: title,
+        body: body,
+        author: author
+      });
+      // Kirim kembali response sukses (201 Created) bersama data yang baru dibuat
+      res.status(201).json(newPost);
+    }
+  } catch (error) {
+    // Jika terjadi error (misalnya validasi gagal), kirim response error
+    res.status(400).json({ message: 'Gagal membuat post', error: error.message });
+  }
 });
