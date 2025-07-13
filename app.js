@@ -132,3 +132,22 @@ app.put('/posts/:id', async (req, res) => {
     res.status(500).json({ message: 'Gagal memperbarui post', error: error.message });
   }
 });
+
+// DELETE - Menghapus postingan berdasarkan ID
+app.delete('/posts/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedPost = await Post.findByIdAndDelete(id);
+
+    // Jika post dengan ID tersebut tidak ditemukan
+    if (!deletedPost) {
+      return res.status(404).json({ message: "Post tidak ditemukan" });
+    }
+
+    // Kirim response konfirmasi bahwa data telah dihapus
+    res.status(200).json({ message: "Post berhasil dihapus" });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Gagal menghapus post', error: error.message });
+  }
+});
