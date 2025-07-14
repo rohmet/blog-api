@@ -4,7 +4,12 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 // Definisikan "cetak biru" untuk postingan blog
-const postSchema = new Schema({
+const postSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId, // Referensi ke ID pengguna
+    required: true,
+    ref: 'User', // Mereferensikan ke model 'User'
+  },
   title: {
     type: String,
     required: true, // Judul wajib diisi
