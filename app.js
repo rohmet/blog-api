@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const { errorHandler } = require('./middleware/error.middleware.js');
 
 // Inisialisasi aplikasi
 const app = express();
@@ -33,5 +34,4 @@ app.get('/', (req, res) => {
 // --- Gunakan Rute ---
 // Semua rute yang dimulai dengan /posts akan ditangani oleh postRoutes
 app.use('/posts', postRoutes);
-
-// (Event listener Mongoose bisa tetap ada jika Anda mau, atau dihapus agar lebih bersih)
+app.use(errorHandler);
