@@ -4,11 +4,11 @@ const asyncHandler = require('express-async-handler');
 // CREATE - Membuat postingan blog baru
 exports.createPost = asyncHandler (async (req, res) => {
   const { title, body, author } = req.body;
-  if (!title || !body || !author) {
+  if (!title || !body) {
     res.status(400);
     throw new Error('Title, body, dan author wajib diisi');
   }
-  const newPost = await Post.create({ title, body, author });
+  const newPost = await Post.create({ title, body, author, user: req.user.id, });
   res.status(201).json(newPost);
 });
 
@@ -35,6 +35,12 @@ exports.updatePost = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error('Post tidak ditemukan');
   }
+
+  if (post.user.toString() !== req.user.id) {
+    res.status(401); // Unauthorized
+    throw new Error('Aksi tidak diizinkan');
+  }
+  
   const updatedPost = await Post.findByIdAndUpdate(req.params.id, req.body, { new: true });
   res.status(200).json(updatedPost);
 });
@@ -46,6 +52,12 @@ exports.deletePost = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error('Post tidak ditemukan');
   }
+
+  if (post.user.toString() !== req.user.id) {
+    res.status(401); // Unauthorized
+    throw new Error('Aksi tidak diizinkan');
+  }
+
   await post.deleteOne(); // atau Post.findByIdAndDelete(req.params.id)
   res.status(200).json({ message: 'Post berhasil dihapus', id: req.params.id });
 });
