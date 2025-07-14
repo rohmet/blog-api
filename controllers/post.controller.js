@@ -1,67 +1,51 @@
 const Post = require('../models/post.model.js');
+const asyncHandler = require('express-async-handler');
 
 // CREATE - Membuat postingan blog baru
-exports.createPost = async (req, res) => {
-  try {
-    const { title, body, author } = req.body;
-    if (!title || !body || !author) {
-      return res.status(400).json({ message: "Title, body, dan author wajib diisi" });
-    }
-    const newPost = await Post.create({ title, body, author });
-    res.status(201).json(newPost);
-  } catch (error) {
-    res.status(500).json({ message: 'Gagal membuat post', error: error.message });
+exports.createPost = asyncHandler (async (req, res) => {
+  const { title, body, author } = req.body;
+  if (!title || !body || !author) {
+    res.status(400);
+    throw new Error('Title, body, dan author wajib diisi');
   }
-};
+  const newPost = await Post.create({ title, body, author });
+  res.status(201).json(newPost);
+});
 
 // READ - Mengambil semua postingan
-exports.getAllPosts = async (req, res) => {
-  try {
-    const posts = await Post.find({}).sort({ createdAt: -1 });
-    res.status(200).json(posts);
-  } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data posts', error: error.message });
-  }
-};
+exports.getAllPosts = asyncHandler (async (req, res) => {
+  const posts = await Post.find({}).sort({ createdAt: -1 });
+  res.status(200).json(posts);
+});
 
 // READ - Mengambil satu postingan berdasarkan ID
-exports.getPostById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const post = await Post.findById(id);
-    if (!post) {
-      return res.status(404).json({ message: "Post tidak ditemukan" });
-    }
-    res.status(200).json(post);
-  } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data post', error: error.message });
+exports.getPostById = (async (req, res) => {
+  const post = await Post.findById(req.params.id);
+  if (!post) {
+    res.status(404);
+    throw new Error('Post tidak ditemukan');
   }
-};
+  res.status(200).json(post);
+});
 
-// UPDATE - Memperbarui postingan berdasarkan ID
-exports.updatePost = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updatedPost = await Post.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
-    if (!updatedPost) {
-      return res.status(404).json({ message: "Post tidak ditemukan" });
-    }
-    res.status(200).json(updatedPost);
-  } catch (error) {
-    res.status(500).json({ message: 'Gagal memperbarui post', error: error.message });
+// UPDATE - Dibungkus dengan asyncHandler dan tanpa try...catch
+exports.updatePost = asyncHandler(async (req, res) => {
+  const post = await Post.findById(req.params.id);
+  if (!post) {
+    res.status(404);
+    throw new Error('Post tidak ditemukan');
   }
-};
+  const updatedPost = await Post.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  res.status(200).json(updatedPost);
+});
 
-// DELETE - Menghapus postingan berdasarkan ID
-exports.deletePost = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const deletedPost = await Post.findByIdAndDelete(id);
-    if (!deletedPost) {
-      return res.status(404).json({ message: "Post tidak ditemukan" });
-    }
-    res.status(200).json({ message: "Post berhasil dihapus" });
-  } catch (error) {
-    res.status(500).json({ message: 'Gagal menghapus post', error: error.message });
+// DELETE - Dibungkus dengan asyncHandler dan tanpa try...catch
+exports.deletePost = asyncHandler(async (req, res) => {
+  const post = await Post.findById(req.params.id);
+  if (!post) {
+    res.status(404);
+    throw new Error('Post tidak ditemukan');
   }
-};
+  await post.deleteOne(); // atau Post.findByIdAndDelete(req.params.id)
+  res.status(200).json({ message: 'Post berhasil dihapus', id: req.params.id });
+});
