@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 // Koneksi ke MongoDB
-mongoose.connect(process.env.MONGODB_URL) // Pastikan variabel env Anda benar
+mongoose.connect(process.env.MONGODB_URI) // Pastikan variabel env Anda benar
   .then(() => {
     console.log('✅ Berhasil terhubung ke MongoDB!');
     app.listen(PORT, () => {
