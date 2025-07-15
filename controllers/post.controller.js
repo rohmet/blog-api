@@ -14,10 +14,26 @@ exports.createPost = asyncHandler (async (req, res) => {
 
 // READ - Mengambil semua postingan
 exports.getAllPosts = asyncHandler (async (req, res) => {
+  // 1. Ambil parameter query, berikan nilai default
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  // 2. Hitung total dokumen untuk metadata
+  const totalPosts = await Post.countDocuments();
+  
+  // 3. Modifikasi query dengan skip dan limit
   const posts = await Post.find({})
   .populate('user', 'nama email')
-  .sort({ createdAt: -1 });
-  res.status(200).json(posts);
+  .sort({ createdAt: -1 })
+  .skip(skip)
+  .limit(limit);
+  res.status(200).json({
+    currentPage: page,
+    totalPages: Math.ceil(totalPosts / limit),
+    totalPosts,
+    posts,
+  });
 });
 
 // READ - Mengambil satu postingan berdasarkan ID
