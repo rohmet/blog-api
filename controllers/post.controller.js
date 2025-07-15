@@ -14,13 +14,15 @@ exports.createPost = asyncHandler (async (req, res) => {
 
 // READ - Mengambil semua postingan
 exports.getAllPosts = asyncHandler (async (req, res) => {
-  const posts = await Post.find({}).sort({ createdAt: -1 });
+  const posts = await Post.find({})
+  .populate('user', 'nama email')
+  .sort({ createdAt: -1 });
   res.status(200).json(posts);
 });
 
 // READ - Mengambil satu postingan berdasarkan ID
 exports.getPostById = (async (req, res) => {
-  const post = await Post.findById(req.params.id);
+  const post = await Post.findById(req.params.id).populate('user', 'name email');
   if (!post) {
     res.status(404);
     throw new Error('Post tidak ditemukan');
